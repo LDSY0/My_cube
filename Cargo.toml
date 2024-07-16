@@ -1,0 +1,6 @@
+[package]
+name = "My_cube"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
