@@ -3,4 +3,9 @@ name = "My_cube"
 version = "0.1.0"
 edition = "2021"
 
+
 [dependencies]
+bevy = "0.13"
+bevy_mod_picking = "0.18"
+bevy_egui = "0.25"
+rand = "0.8.5"
