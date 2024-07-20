@@ -29,22 +29,22 @@ pub struct Piece {
 impl Piece {
     //提供方法来判断魔方块的各个面是否存在。
     pub fn has_up_face(&self) -> bool {
-        self.init_pos.y == 1.0;
+        self.init_pos.y == 1.0
     }
     pub fn has_down_face(&self) -> bool {
-        self.init_pos.y == -1.0;
+        self.init_pos.y == -1.0
     }
     pub fn has_left_face(&self) -> bool {
-        self.init_pos.x == -1.0;
+        self.init_pos.x == -1.0
     }
     pub fn has_right_face(&self) -> bool {
-        self.init_pos.x == 1.0;
+        self.init_pos.x == 1.0
     }
     pub fn has_front_face(&self) -> bool {
-        self.init_pos.z == 1.0;
+        self.init_pos.z == 1.0
     }
     pub fn has_back_face(&self) -> bool {
-        self.init_pos.z == -1.0;
+        self.init_pos.z == -1.0
     }
 }
 
@@ -70,9 +70,9 @@ pub struct CubeSettings {
     pub front_color: Color,
     pub back_color: Color,
     pub up_color: Color,
-    pub down_color: Cololr,
-    pub left_color: Cololr,
-    pub right_color: Cololr,
+    pub down_color: Color,
+    pub left_color: Color,
+    pub right_color: Color,
     //游玩模式
     pub play_mode: PlayMode,
     //相机缩放速度
@@ -80,17 +80,17 @@ pub struct CubeSettings {
 }
 
 impl Default for CubeSettings {
-    fn Default() -> Self {
+    fn default() -> Self {
         Self {
             cube_order: 3,
             piece_size: 1.0,
             rotate_speed: 1.0,
-            front_color: GREEN,
-            back_color: RED,
-            up_color: WHITE,
-            down_color: ORANGE,
-            left_color: BLUE,
-            right_color: YELLOW,
+            front_color: Color::GREEN,
+            back_color: Color::RED,
+            up_color: Color::WHITE,
+            down_color: Color::ORANGE,
+            left_color: Color::BLUE,
+            right_color: Color::YELLOW,
             play_mode: PlayMode::Practice,
             camera_zoom_speed: 1.01,
         }
@@ -120,9 +120,9 @@ pub fn create_cube(
     materials: &mut ResMut<Assets<StandardMaterial>>, //添加一个新的魔方材质
     cube_settings: &Res<CubeSettings>,                //获取魔方的大小和颜色设置
 ) {
-    for x in [-1.0, 0, 1.0] {
-        for y in [-1.0, 0, 1.0] {
-            for z in [-1.0, 0, 1.0] {
+    for x in [-1.0, 0.0, 1.0] {
+        for y in [-1.0, 0.0, 1.0] {
+            for z in [-1.0, 0.0, 1.0] {
                 let piece = Piece {
                     init_pos: Vec3::new(x, y, z),
                     size: cube_settings.piece_size,
@@ -130,7 +130,7 @@ pub fn create_cube(
                 commands
                     .spawn(PbrBundle {
                         mesh: meshes.add(Cuboid::new(1.0, 1.0, 1.0).mesh()), //创建一个尺寸为 1.0 x 1.0 x 1.0 的立方体对象,将生成的网格数据添加到 meshes 资源管理器中
-                        material: materials.add(Cololr::BLACK), //添加一个黑色材质到 materials 资源管理器，并将其分配给实体的材质组件。
+                        material: materials.add(Color::BLACK), //添加一个黑色材质到 materials 资源管理器，并将其分配给实体的材质组件。
                         transform: Transform::from_translation(Vec3::new(x, y, z)), //设置实体的初始位置为 (x, y, z)。
                         ..default()
                     })
@@ -139,7 +139,7 @@ pub fn create_cube(
                     .insert(RaycastPickable::default()) //为实体插入 RaycastPickable 组件，使其在使用光线投射插件时可以被拾取
                     .insert(On::<Pointer<DragStart>>::run(handle_drag_start)) //为实体插入一个事件监听器，当光标拖动开始事件 (Pointer<DragStart>) 触发时，运行 handle_drag_start 函数。
                     .insert(On::<Pointer<Move>>::run(handle_move)) //为实体插入一个事件监听器，当光标移动事件 (Pointer<Move>) 触发时，运行 handle_move 函数。
-                    .insert(On::<Pointer<DragEnd>>::run(handld_drag_end)) //为实体插入一个事件监听器，当光标拖动结束事件 (Pointer<DragEnd>) 触发时，运行 handle_drag_end 函数。
+                    .insert(On::<Pointer<DragEnd>>::run(handle_drag_end)) //为实体插入一个事件监听器，当光标拖动结束事件 (Pointer<DragEnd>) 触发时，运行 handle_drag_end 函数。
                     .with_children(|parent: &mut ChildBuilder| {
                         //贴纸
                         spawn_stickers(parent, piece, meshes, materials, cube_settings);
@@ -160,8 +160,8 @@ pub fn spawn_stickers(
     let sticker_size = 0.9 * cube_settings.piece_size;
 
     if piece.has_up_face() {
-        let transform =
-            Transform::from_translation(Vec3::new(0, 0.5 * cube_settings.piece_size + 0.01, 0));
+        let mut transform =
+            Transform::from_translation(Vec3::new(0.0, 0.5 * cube_settings.piece_size + 0.01, 0.0));
         parent.spawn(PbrBundle {
             mesh: meshes.add(Cuboid::new(sticker_size, 0.01, sticker_size)),
             material: materials.add(StandardMaterial {
@@ -175,8 +175,11 @@ pub fn spawn_stickers(
     }
 
     if piece.has_down_face() {
-        let transform =
-            Transform::from_translation(Vec3::new(0, -0.5 * cube_settings.piece_size - 0.01, 0));
+        let mut transform = Transform::from_translation(Vec3::new(
+            0.0,
+            -0.5 * cube_settings.piece_size - 0.01,
+            0.0,
+        ));
         parent.spawn(PbrBundle {
             mesh: meshes.add(Cuboid::new(sticker_size, 0.01, sticker_size)),
             material: materials.add(StandardMaterial {
@@ -190,8 +193,8 @@ pub fn spawn_stickers(
     }
 
     if piece.has_front_face() {
-        let transform =
-            Transform::from_translation(Vec3::new(0, 0, 0.5 * cube_settings.piece_size + 0.01));
+        let mut transform =
+            Transform::from_translation(Vec3::new(0.0, 0.0, 0.5 * cube_settings.piece_size + 0.01));
         transform.rotate_x(FRAC_PI_2); //绕x顺时针90度
         parent.spawn(PbrBundle {
             mesh: meshes.add(Cuboid::new(sticker_size, 0.01, sticker_size)),
@@ -206,8 +209,11 @@ pub fn spawn_stickers(
     }
 
     if piece.has_back_face() {
-        let transform =
-            Transform::from_translation(Vec3::new(0, 0, -0.5 * cube_settings.piece_size - 0.01));
+        let mut transform = Transform::from_translation(Vec3::new(
+            0.0,
+            0.0,
+            -0.5 * cube_settings.piece_size - 0.01,
+        ));
         transform.rotate_x(-FRAC_PI_2); //绕x逆时针90度
         parent.spawn(PbrBundle {
             mesh: meshes.add(Cuboid::new(sticker_size, 0.01, sticker_size)),
@@ -222,8 +228,11 @@ pub fn spawn_stickers(
     }
 
     if piece.has_left_face() {
-        let transform =
-            Transform::from_translation(Vec3::new(-0.5 * cube_settings.piece_size - 0.01, 0, 0));
+        let mut transform = Transform::from_translation(Vec3::new(
+            -0.5 * cube_settings.piece_size - 0.01,
+            0.0,
+            0.0,
+        ));
         transform.rotate_z(FRAC_PI_2);
         parent.spawn(PbrBundle {
             mesh: meshes.add(Cuboid::new(sticker_size, 0.01, sticker_size)),
@@ -238,8 +247,8 @@ pub fn spawn_stickers(
     }
 
     if piece.has_right_face() {
-        let transform =
-            Transform::from_translation(Vec3::new(0.5 * cube_settings.piece_size + 0.01, 0, 0));
+        let mut transform =
+            Transform::from_translation(Vec3::new(0.5 * cube_settings.piece_size + 0.01, 0.0, 0.0));
         transform.rotate_z(-FRAC_PI_2);
         parent.spawn(PbrBundle {
             mesh: meshes.add(Cuboid::new(sticker_size, 0.01, sticker_size)),
